@@ -798,7 +798,8 @@ defmodule Mongo.Ecto do
   end
 
   defp db_version(repo) do
-    version = command(repo, %{"buildinfo": 1}, [])["versionArray"]
+    {:ok, db_config} = command(repo, %{"buildinfo": 1}, [])
+    version = db_config["versionArray"]
 
     Enum.fetch!(version, 0)
   end
