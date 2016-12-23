@@ -327,7 +327,7 @@ defmodule Mongo.Ecto do
   recompilation in order to make an effect.
 
     * `:adapter` - The adapter name, in this case, `Mongo.Ecto`
-    * `:pool` - The connection pool module, defaults to `Mongo.Pool.Poolboy`
+    * `:pool` - The connection pool module, defaults to `DBConnection.Poolboy.Poolboy`
     * `:log_level` - The level to use when logging queries (default: `:debug`)
 
   ### Connection options
@@ -372,11 +372,11 @@ defmodule Mongo.Ecto do
   defmacro __before_compile__(env) do
     module = env.module
     config = Module.get_attribute(module, :config)
-    adapter = Keyword.get(config, :pool, Mongo.Pool.Poolboy)
+    adapter = Keyword.get(config, :pool, DBConnection.Poolboy.Poolboy)
 
     quote do
       defmodule Pool do
-        use Mongo.Pool, name: __MODULE__, adapter: unquote(adapter)
+        use DBConnection.Poolboy, name: __MODULE__, adapter: unquote(adapter)
 
         def log(return, queue_time, query_time, fun, args) do
           Mongo.Ecto.log(unquote(module), return, queue_time, query_time, fun, args)

@@ -1,5 +1,6 @@
 defmodule Mongo.Ecto.AdminPool do
   @moduledoc false
 
-  use Mongo.Pool, name: __MODULE__, adapter: Mongo.Pool.Poolboy
+  use DBConnection.Poolboy, name: __MODULE__, adapter: DBConnection.Poolboy.Poolboy
+  use DBConnection.Poolboy, name: __MODULE__, adapter: DBConnection.Poolboy.Poolboy
 end
