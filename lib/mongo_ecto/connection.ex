@@ -12,13 +12,13 @@ defmodule Mongo.Ecto.Connection do
   def storage_down(opts) do
     opts = Keyword.put(opts, :size, 1)
 
-    {:ok, _} = Mongo.Ecto.AdminPool.start_link(opts)
+    {:ok, _} = DBConnection.Poolboy.start_link(opts)
 
     try do
-      Mongo.run_command(Mongo.Ecto.AdminPool, dropDatabase: 1)
+      Mongo.run_command(DBConnection.Poolboy, dropDatabase: 1)
       :ok
     after
-      true = Mongo.Ecto.AdminPool.stop
+      true = DBConnection.Poolboy.stop
     end
   end
 
