@@ -768,7 +768,7 @@ defmodule Mongo.Ecto do
 
   defp list_collections(version, repo, opts) when version >= 3 do
     {ok, resp} = command(repo, %{"listCollections": 1}, opts)
-    coll = resp["cursor"]["firstBatch"]
+    colls = resp["cursor"]["firstBatch"]
 
     all_collections =
       colls
