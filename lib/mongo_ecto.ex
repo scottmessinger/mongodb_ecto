@@ -564,10 +564,32 @@ defmodule Mongo.Ecto do
       "The following fields in #{inspect meta.schema} are tagged as such: #{inspect returning}"
   end
 
-  def insert(repo, meta, params, _, [], opts) do
-    normalized = NormalizedQuery.insert(meta, params)
-
-    case Connection.insert(repo, normalized, opts) do
+  def insert(repo, meta, params, on_conflict, [], opts) do
+    # should_upsert = case on_conflict do
+    #   {:replace_all, _, _}-> true
+    #   _ -> false
+    # end
+    IO.inspect params
+    IO.inspect params
+    {command, normalized} = case on_conflict do
+      {:replace_all, _, fields} ->
+        IO.inspect "FIELDS"
+        IO.inspect fields
+        filter = Enum.reduce(fields, %{}, fn (field, query) ->
+          Map.put(query, field, Keyword.get(params, field))
+        end)
+        {:upsert, NormalizedQuery.upsert(meta, filter, params)}
+      _ ->
+        {:insert, NormalizedQuery.insert(meta, params)}
+    end
+    # opts = Keyword.put(opts, :upsert, should_upsert)
+    #
+    # IO.inspect "INSERT!!!"
+    # normalized =
+    # IO.inspect on_conflict
+    #
+    #
+    case apply(Connection, command, [repo, normalized, opts]) do
       {:ok, _} ->
         {:ok, []}
       other ->

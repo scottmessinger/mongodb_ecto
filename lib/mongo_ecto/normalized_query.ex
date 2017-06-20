@@ -128,6 +128,20 @@ defmodule Mongo.Ecto.NormalizedQuery do
     %WriteQuery{coll: coll, command: command, database: prefix}
   end
 
+  def upsert(%{source: {prefix, coll}, schema: schema}, filter, document) do
+    # command = command(:upsert, filter, document, primary_key(schema))
+    command = command(:update, document, primary_key(schema))
+    # command = command(:insert, document, primary_key(schema))
+    query   = query(filter, primary_key(schema))
+    # query = query(filter, primary_key(schema))
+    # command = command(:insert, document, primary_key(schema))
+    IO.inspect "COMMAND"
+    IO.inspect command
+    IO.inspect query
+
+    %WriteQuery{coll: coll, query: query, command: command, database: prefix}
+  end
+
   def command(command, opts) do
     %CommandQuery{command: command, database: Keyword.get(opts, :database, nil)}
   end
@@ -260,6 +274,11 @@ defmodule Mongo.Ecto.NormalizedQuery do
     document
     |> value(pk, "insert command")
     |> map_unless_empty
+  end
+
+  defp command(:upsert, filter, document, pk) do
+    document |> value(pk, "upsert") |> map_unless_empty
+    |> merge_keys(filter, "upsert")
   end
 
   defp command(:update, values, pk) do

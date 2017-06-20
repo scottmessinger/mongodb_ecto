@@ -1,5 +1,5 @@
 # System.at_exit fn _ -> Logger.flush end
-Logger.configure(level: :info)
+Logger.configure(level: :debug)
 ExUnit.start exclude: [:uses_usec, :id_type, :read_after_writes,
                        :sql_fragments, :decimal_type, :invalid_prefix,
                        :transaction, :foreign_key_constraint, :composite_pk,

@@ -123,6 +123,27 @@ defmodule Mongo.Ecto.Connection do
     end
   end
 
+  def upsert(repo, %WriteQuery{} = query, opts) do
+    IO.inspect query
+    coll     = query.coll
+    command  = query.command
+    opts     = query.opts ++ opts
+    query    = query.query
+    opts = Keyword.put(opts, :upsert, true)
+    opts = Keyword.put(opts, :log, true)
+
+    IO.inspect "OPTS!"
+    # IO.inspect coll
+    # IO.inspect query
+    IO.inspect command
+    # IO.inspect opts
+
+    case query(repo, :find_one_and_update, [coll, query, command], opts) do
+      {:ok, result}   -> {:ok, result}
+      {:error, error} -> check_constraint_errors(error)
+    end
+  end
+
   def insert_all(repo, %WriteQuery{} = query, opts) do
     coll     = query.coll
     command  = query.command
@@ -146,6 +167,7 @@ defmodule Mongo.Ecto.Connection do
   defp query(repo, operation, args, opts) do
     {conn, default_opts} = repo.__pool__
     args = [conn] ++ args ++ [with_log(repo, opts ++ default_opts)]
+    IO.inspect args
     apply(Mongo, operation, args)
   end
 
@@ -239,6 +261,10 @@ defmodule Mongo.Ecto.Connection do
   end
   defp format_query(%Query{action: :replace_one, extra: coll}, [filter, doc]) do
     ["REPLACE", format_part("coll", coll), format_part("filter", filter),
+     format_part("document", doc)]
+  end
+  defp format_query(%Query{action: :find_one_and_update, extra: coll}, [filter, doc]) do
+    ["FIND_AND_UPDATE", format_part("coll", coll), format_part("filter", filter),
      format_part("document", doc)]
   end
   defp format_query(%Query{action: :get_more, extra: coll}, [cursor]) do
